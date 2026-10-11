@@ -5,7 +5,7 @@
 
 let scene = 'title', sceneT = 0;
 let battle = null, paused = false;
-const rules = { teams: false, cpus: 1, cpuLevel: 1, items: true, stage: 4 };
+const rules = { teams: false, cpus: 1, cpuLevel: 0, items: true, stage: 4 };
 let setupRow = 0;
 let slots = [];          // { ctrl, fighter (index in ROSTER), team, ready }
 let readyT = 0;
@@ -54,7 +54,7 @@ function updateSetup(A) {
     sfx.select();
     if (setupRow === 0) rules.teams = !rules.teams;
     if (setupRow === 1) rules.cpus = (rules.cpus + d + 4) % 4;
-    if (setupRow === 2) rules.cpuLevel = (rules.cpuLevel + d + 3) % 3;
+    if (setupRow === 2) rules.cpuLevel = (rules.cpuLevel + d + CPU_LEVELS.length) % CPU_LEVELS.length;
     if (setupRow === 3) rules.items = !rules.items;
     if (setupRow === 4) rules.stage = (rules.stage + d + 5) % 5;
   }

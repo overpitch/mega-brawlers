@@ -9,9 +9,11 @@ const RINGOUT_DAMAGE = 30;
 const TEAM_COLORS = ['#ef4444', '#3b82f6'];
 const SLOT_COLORS = ['#ef4444', '#3b82f6', '#facc15', '#22c55e'];
 const CPU_LEVELS = [
-  { name: 'EASY',   react: 26, aggro: 0.35, block: 0.04, special: 0.08, aim: 0.55 },
-  { name: 'NORMAL', react: 13, aggro: 0.6,  block: 0.18, special: 0.14, aim: 0.8 },
-  { name: 'HARD',   react: 5,  aggro: 0.9,  block: 0.4,  special: 0.2,  aim: 0.95 },
+  // lazy = chance to stand around doing nothing for a bit; recover = chance it tries to get back after falling off
+  { name: 'NOOB',   react: 80, aggro: 0.06, block: 0,    special: 0.02, aim: 0.25, dmg: 0.45, lazy: 0.02,  recover: 0.5 },
+  { name: 'EASY',   react: 44, aggro: 0.17, block: 0.02, special: 0.05, aim: 0.45, dmg: 0.7,  lazy: 0.006, recover: 0.85 },
+  { name: 'NORMAL', react: 13, aggro: 0.6,  block: 0.18, special: 0.14, aim: 0.8,  dmg: 1,    lazy: 0,     recover: 1 },
+  { name: 'HARD',   react: 5,  aggro: 0.9,  block: 0.4,  special: 0.2,  aim: 0.95, dmg: 1,    lazy: 0,     recover: 1 },
 ];
 const BLANK_IN = { left: false, right: false, up: false, down: false, jump: false, jumpP: false, attackP: false, specialP: false, special: false, block: false, downP: false, upP: false };
 
@@ -457,11 +459,12 @@ class Battle {
       if (t.shield <= 0) t.breakShield(this);
       return true;
     }
-    const dmg = h.dmg;
+    const dmg = h.dmg * (a.ai ? a.ai.L.dmg : 1);   // easier computers hit softer
     t.hp = Math.max(0, t.hp - dmg);
     if (a !== t) { a.dmgDealt += dmg; t.lastHitBy = a; t.lastHitT = this.time; }
     // knockback grows as health drops, like Smash
     let kb = h.kb * (1 + (1 - t.hp / MAX_HP) * 1.6) / t.s.weight;
+    if (a.ai) kb *= 0.55 + 0.45 * a.ai.L.dmg;      // easier computers knock you less far too
     const ko = t.hp <= 0;
     if (ko) kb = Math.max(kb, 24);
     const ang = h.ang * DEG;
@@ -868,6 +871,8 @@ class BrawlAI {
     const offstage = f.x < m.x1 - 4 || f.x > m.x2 + 4 || (f.y > m.y + 4 && !f.onGround);
     // 1. get back to the stage
     if (offstage && !f.onGround) {
+      if (this.giveUp === undefined) this.giveUp = Math.random() > L.recover;   // decided once per fall
+      if (this.giveUp) return I;
       const dir = Math.sign(center - f.x);
       I[dir > 0 ? 'right' : 'left'] = true;
       const below = f.y > m.y - 30, farX = Math.min(Math.abs(f.x - m.x1), Math.abs(f.x - m.x2)) > 160;
@@ -880,7 +885,11 @@ class BrawlAI {
       }
       return I;
     }
+    this.giveUp = undefined;
     if (this.cd > 0) this.cd--;
+    // noob computers zone out sometimes
+    if (this.wait > 0) { this.wait--; return I; }
+    if (L.lazy && Math.random() < L.lazy) { this.wait = Math.round(rand(40, 110)); return I; }
     // 2. pick a target: the nearest enemy that's still fighting
     let target = null, best = Infinity;
     for (const o of B.fighters) {

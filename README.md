@@ -13,7 +13,8 @@ A Smash Bros-style fighting game made for (and designed by) Murilo. Smooth carto
 - **Health bars:** everyone starts with 100. Hit someone to 0 and they're out. Last fighter (or team) standing wins.
 - The lower your health, the farther hits send you flying.
 - **Falling off:** get back with your double jump, your **up-special** recovery move, and by **grabbing the ledge**. Fly off the edge of the screen and you lose 30 health, then float back in on a cloud.
-- **Match rules** (picked before each match): Free-for-all or 2 vs 2 teams, 0 to 3 computer fighters (Easy, Normal or Hard), items on or off, and the stage.
+- **Match rules** (picked before each match): Free-for-all or 2 vs 2 teams, 0 to 3 computer fighters, the computer level, items on or off, and the stage.
+- **Computer levels:** **Noob** (the default: slow, rarely attacks, hits soft, sometimes zones out or forgets to jump back), **Easy**, **Normal** and **Hard**. Noob and Easy computers also do less damage and knock you less far.
 - **Items:** bombs (pick up, press attack to throw), a hammer, healing food (+25), and a star (invincible for 8 seconds).
 - **Effects:** freeze-frame and flash on big hits, motion trails, and the final knockout in slow motion.
 
